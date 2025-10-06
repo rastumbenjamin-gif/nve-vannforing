@@ -5,7 +5,7 @@ import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, Responsi
 const API_BASE_URL = 'https://hydapi.nve.no/api/v1';
 
 function App() {
-  const [apiKey, setApiKey] = useState('');
+  const [apiKey, setApiKey] = useState(import.meta.env.VITE_NVE_API_KEY || '');
   const [stations, setStations] = useState([]);
   const [filteredStations, setFilteredStations] = useState([]);
   const [searchTerm, setSearchTerm] = useState('');
@@ -14,7 +14,8 @@ function App() {
   const [loading, setLoading] = useState(false);
   const [startDate, setStartDate] = useState('');
   const [endDate, setEndDate] = useState('');
-  const [showApiKeyInput, setShowApiKeyInput] = useState(true);
+  const [parameter, setParameter] = useState('1001');
+  const [showApiKeyInput, setShowApiKeyInput] = useState(!import.meta.env.VITE_NVE_API_KEY);
 
   useEffect(() => {
     const today = new Date();
@@ -70,7 +71,7 @@ function App() {
     try {
       const params = new URLSearchParams({
         StationId: stationId,
-        Parameter: '1000',
+        Parameter: parameter,
         ResolutionTime: '0',
         ReferenceTime: `${startDate}/${endDate}`
       });
@@ -238,10 +239,25 @@ function App() {
               <div className="bg-gradient-to-r from-green-50 to-green-100 p-4 border-b border-green-200">
                 <h2 className="font-bold text-lg text-gray-800 flex items-center gap-2">
                   <Calendar className="w-5 h-5 text-green-600" />
-                  Datovelger
+                  Innstillinger
                 </h2>
               </div>
               <div className="p-4 space-y-4">
+                <div>
+                  <label className="block text-sm font-semibold text-gray-700 mb-2">Parameter</label>
+                  <select
+                    value={parameter}
+                    onChange={(e) => setParameter(e.target.value)}
+                    className="w-full px-3 py-2 border-2 border-gray-200 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-all outline-none"
+                  >
+                    <option value="1001">Vannføring (m³/s)</option>
+                    <option value="1000">Vannstand (m)</option>
+                    <option value="1003">Vanntemperatur (°C)</option>
+                    <option value="17">Lufttemperatur (°C)</option>
+                    <option value="2001">Snødybde (cm)</option>
+                    <option value="3001">Nedbør (mm)</option>
+                  </select>
+                </div>
                 <div>
                   <label className="block text-sm font-semibold text-gray-700 mb-2">Fra dato</label>
                   <input
@@ -267,7 +283,7 @@ function App() {
                     className="w-full bg-gradient-to-r from-green-600 to-green-700 text-white py-3 rounded-lg font-semibold hover:from-green-700 hover:to-green-800 disabled:from-gray-400 disabled:to-gray-400 transition-all shadow-lg hover:shadow-xl flex items-center justify-center gap-2"
                   >
                     <RefreshCw className={`w-4 h-4 ${loading ? 'animate-spin' : ''}`} />
-                    {loading ? 'Laster...' : 'Oppdater data'}
+                    {loading ? 'Laster...' : 'Hent data'}
                   </button>
                 )}
               </div>
